@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Image from "next/image";
 
 export default function Home() {
@@ -22,6 +24,10 @@ export default function Home() {
           </li>
           <li>Save and see your changes instantly.</li>
         </ol>
+        <Button className="p-10" variant="outline">
+          Mua khóa hoc
+        </Button>
+        <Input type="text" name="firstName" />
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
