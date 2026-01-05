@@ -1,7 +1,17 @@
+import Image from "next/image";
+
 export default function Home() {
   return (
     <main>
-      <h1 className="text-4xl text-center roboto-thin">Test font google</h1>
+      <div className=" w-[700px] h-[700px] bg-red-300">
+        <Image
+          src="/images/suffer.png"
+          alt="Sample Image"
+          width={500}
+          height={500}
+          quality={100}
+        />
+      </div>
     </main>
   );
 }
