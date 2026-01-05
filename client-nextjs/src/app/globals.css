@@ -8,8 +8,6 @@
   }
 }
 
-
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -66,8 +64,6 @@
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border;
@@ -75,4 +71,12 @@
   body {
     @apply bg-background text-foreground;
   }
+  h1,
+  h2,
+  h3 {
+    @apply text-red-500;
+  }
 }
+
+/* đưa css vào base layer nó tự tính theo tailwind theo base, components, utilities mà không bị override */
+/* Nếu dùng tailwind thì nên dùng @layer để đảm bảo về tính dễ đọc cũng như là độ ưu tiên css khi build */

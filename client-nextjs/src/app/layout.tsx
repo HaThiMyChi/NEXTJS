@@ -1,17 +1,25 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
+import localFont from "next/font/local";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
+const myFont = localFont({
+  src: [
+    {
+      path: "./Roboto-Thin.ttf",
+      weight: "100",
+    },
+    {
+      path: "./Roboto-Regular.ttf",
+      weight: "400",
+    },
+  ],
+  display: "swap",
+  variable: "--font-roboto",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+// import { Roboto } from "next/font/google";
+
+// If loading a variable font, you don't need to specify the font weight
+// const roboto = Roboto({ subsets: ["vietnamese"], weight: ["100", "300"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -25,9 +33,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${myFont.className} ${myFont.variable}`}>
         {children}
       </body>
     </html>
