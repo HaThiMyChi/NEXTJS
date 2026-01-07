@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Inter } from "next/font/google";
 import Header from "@/components/header";
+import { Toaster } from "@/components/ui/toaster";
 
 const myFont = localFont({
   src: [
@@ -47,6 +48,7 @@ export default function RootLayout({
           <Header />
           {children}
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );
