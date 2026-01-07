@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import localFont from "next/font/local";
+import { ThemeProvider } from "@/components/theme-provider";
+import { Inter } from "next/font/google";
 
 const myFont = localFont({
   src: [
@@ -19,7 +21,7 @@ const myFont = localFont({
 // import { Roboto } from "next/font/google";
 
 // If loading a variable font, you don't need to specify the font weight
-// const roboto = Roboto({ subsets: ["vietnamese"], weight: ["100", "300"] });
+const inter = Inter({ subsets: ["vietnamese"] });
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -32,10 +34,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${myFont.className} ${myFont.variable}`}>
-        {children}
-      </body>
-    </html>
+    <>
+      <html lang="en" suppressHydrationWarning>
+        <head />
+        <body className={inter.className}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </body>
+      </html>
+    </>
   );
 }

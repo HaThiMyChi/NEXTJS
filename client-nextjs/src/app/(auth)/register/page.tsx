@@ -1,5 +1,11 @@
+import { ModeToggle } from "@/components/mode-toggle";
 import React from "react";
 
 export default function RegisterPage() {
-  return <div>test register</div>;
+  return (
+    <div>
+      <ModeToggle />
+      test register
+    </div>
+  );
 }
