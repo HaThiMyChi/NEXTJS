@@ -59,6 +59,27 @@ export default function LoginForm() {
       toast({
         description: result.payload.message,
       });
+
+      const resultFromNextServer = await fetch("/api/auth", {
+        method: "POST",
+        body: JSON.stringify(result),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }).then(async (res) => {
+        const payload = await res.json();
+
+        const data = {
+          status: res.status,
+          payload,
+        };
+
+        if (!res.ok) {
+          throw data;
+        }
+        return data;
+      });
+      console.log("resultFromNextServer", resultFromNextServer);
     } catch (error: any) {
       console.log("error", error);
       const errors = error?.payload?.errors as {
