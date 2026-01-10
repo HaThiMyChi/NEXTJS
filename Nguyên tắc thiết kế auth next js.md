@@ -17,6 +17,58 @@ Cách này chỉ áp dụng cho server check authentication dựa vào header Au
 
 - Tại những trang không cần authenticated, chúng ta có thể gọi api ở cả server và client của next.js mà không cần phải làm gì thêm.
 
+Vấn đề sẽ nằm ở những trang cần authenticated. Làm sao để Next.js biết được user đã authenticated hay chưa. Để giải quyết vấn đề này chúng ta cần thiết kế một middleware
+
+# Middleware ở Next.js
+
+Middleware ở Next.js thì có 2 loại:
+
+Middleware hoạt động ở client next (giống như những gì chúng ta đã làm trước đây ở React.js truyền thống)
+Middleware hoạt động ở server next
+
+Middleware ở client next
+Nếu dùng middleware client thì chỉ cần tạo 1 use client AuthenticatedComponent và wrap nó ở những trang cần authenticated.
+
+'use client'
+export default function AuthenticatedComponent({ children }) {
+const token = localStorage.getItem('token')
+if (!token) return <div>Chưa đăng nhập</div>
+return children
+}
+
+Cách dùng middleware này là server next.js sẽ không biết được user đã authenticated hay chưa. Ví dụ bạn truy cập vào trang /profile (cần authenticated) thì đây là flow diễn ra
+
+Bạn enter url /profile => Trình duyệt gửi request đến server Next.js (request này sẽ gửi kèm cookie nếu có) => Server Next.js sẽ render trang /profile vì không biết được user đã authenticated hay chưa và trả về trình duyệt => Trình duyệt nhận được trang /profile và chạy use client AuthenticatedComponent => AuthenticatedComponent sẽ kiểm tra xem có token trong localStorage không, nếu có thì render trang /profile ra, nếu không thì render ra chưa đăng nhập
+
+Kết quả vẫn đúng, người dùng vẫn thấy trang /profile nếu đã authenticated nhưng cách này có một số khuyết điểm
+
+Profile Component phải là một client nếu chúng ta cần fetch các api cần authenticated, vì chỉ có client mới có thể truy cập được vào localStorage
+
+Không đồng nhất giữa server và client, điều này không tốt.
+
+Cách giải quyết là dùng middleware ở server next.js
+
+Middleware ở server next
+Next.js cung cấp 1 cách để chúng ta có thể dùng middleware ở server next.js, có thể xem tại đây
+
+Middleware này sẽ chạy ngay khi có request gửi đến server Next.js, trước khi trang được render ở server.
+
+Nhưng chúng ta cần 1 thứ gì đó để Next.js biết được user đã authenticated hay chưa, và thứ đó là chỉ có thể là cookie từ trình duyệt gửi lên. Vì khi bạn enter url /profile thì chỉ có cookie là được gửi kèm theo request đến server Next.js.
+
+Nãy giờ chưa setup cookie gì cả, bây giờ chúng ta sẽ setup logic cookie. Đó là khi chúng ta login thành công thì chúng ta sẽ set cookie là isLogged=true vào trình duyệt ở client luôn. Cookie này có thời hạn tương tự với token, và cookie isLogged có thể dùng JavaScript can thiệp được. Như vậy thì khi request đến server Next.js thì server sẽ biết được user đã authenticated hay chưa dựa vào cookie isLogged. Client next.js cũng sẽ biết được user đã authenticated hay chưa dựa vào cookie isLogged (hoặc giá trị lưu trong localStorage tùy thích, nhưng khuyến khích dùng isLogged từ cookie cho đồng bộ).
+
+Và đây là middleware ở server next.js
+
+export const config = {
+matcher: ['/profile']
+}
+export function middleware(request: NextRequest) {
+const isLogged =
+(request.cookies.get('isLogged')?.value as string | undefined) === 'true'
+if (!isLogged) return new Response('Chưa đăng nhập', { status: 401 })
+}
+Ưu điểm cách này là đồng bộ được giữa server và client.
+
 # Cách 2: Dùng cookie
 
 Cách này áp dụng cho Server check token dựa vào cookie hay header Authorization đều được.

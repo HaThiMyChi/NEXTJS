@@ -5,6 +5,8 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Inter } from "next/font/google";
 import Header from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
+import AppProvider from "@/src/app/app-provider";
+import { cookies } from "next/headers";
 
 const myFont = localFont({
   src: [
@@ -35,6 +37,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = cookies();
+  const sessionToken = cookieStore.get("sessionToken");
+  console.log("RootLayout", cookieStore.get("sessionToken"));
   return (
     <html lang="en" suppressHydrationWarning>
       <head />
@@ -46,7 +51,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Header />
-          {children}
+          <AppProvider initialSessionToken={sessionToken?.value}>
+            {children}
+          </AppProvider>
         </ThemeProvider>
         <Toaster />
       </body>

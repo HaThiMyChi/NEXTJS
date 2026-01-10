@@ -20,9 +20,11 @@ import { Input } from "@/components/ui/input";
 import { LoginBody, LoginBodyType } from "@/src/schemaValidations/auth.schema";
 import envConfig from "@/config";
 import { useToast } from "@/hooks/use-toast";
+import { useAppContext } from "@/src/app/app-provider";
 
 export default function LoginForm() {
   const { toast } = useToast();
+  const { setSessionToken } = useAppContext();
 
   // 1. Define your form.
   const form = useForm<LoginBodyType>({
@@ -80,6 +82,7 @@ export default function LoginForm() {
         return data;
       });
       console.log("resultFromNextServer", resultFromNextServer);
+      setSessionToken(resultFromNextServer.payload.data.token);
     } catch (error: any) {
       console.log("error", error);
       const errors = error?.payload?.errors as {
