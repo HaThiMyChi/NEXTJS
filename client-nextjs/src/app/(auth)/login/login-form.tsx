@@ -21,6 +21,8 @@ import { LoginBody, LoginBodyType } from "@/src/schemaValidations/auth.schema";
 import envConfig from "@/config";
 import { useToast } from "@/hooks/use-toast";
 import { useAppContext } from "@/src/app/app-provider";
+import authApiRequest from "@/src/apiRequests/auth";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
   const { toast } = useToast();
@@ -36,53 +38,19 @@ export default function LoginForm() {
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<LoginBodyType>) {
+  async function onSubmit(values: LoginBodyType) {
     try {
-      const result = await fetch(
-        `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/login`,
-        {
-          body: JSON.stringify(values),
-          headers: {
-            "Content-Type": "application/json",
-          },
-          method: "POST",
-        }
-      ).then(async (res) => {
-        const payload = await res.json();
-        const data = {
-          status: res.status,
-          payload,
-        };
-        if (!res.ok) {
-          throw data;
-        }
-        return data;
-      });
+      const result = await authApiRequest.login(values);
+      const router = useRouter();
+
+      await authApiRequest.auth({ sessionToken: result.payload.data.token });
       toast({
         description: result.payload.message,
       });
+      console.log("result login form", result);
 
-      const resultFromNextServer = await fetch("/api/auth", {
-        method: "POST",
-        body: JSON.stringify(result),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then(async (res) => {
-        const payload = await res.json();
-
-        const data = {
-          status: res.status,
-          payload,
-        };
-
-        if (!res.ok) {
-          throw data;
-        }
-        return data;
-      });
-      console.log("resultFromNextServer", resultFromNextServer);
-      setSessionToken(resultFromNextServer.payload.data.token);
+      setSessionToken(result.payload.data.token);
+      router.push("/me");
     } catch (error: any) {
       console.log("error", error);
       const errors = error?.payload?.errors as {
