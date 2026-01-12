@@ -22,8 +22,14 @@ import {
   RegisterBodyType,
 } from "@/src/schemaValidations/auth.schema";
 import envConfig from "@/config";
+import authApiRequest from "@/src/apiRequests/auth";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { sessionToken } from "@/lib/http";
 
 export default function RegisterForm() {
+  const { toast } = useToast();
+  const router = useRouter();
   // 1. Define your form.
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
@@ -36,20 +42,43 @@ export default function RegisterForm() {
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<RegisterBodyType>) {
+  async function onSubmit(values: RegisterBodyType) {
     // Do something with the form values.
     // ✅ This will be type-safe and validated.
-    const result = await fetch(
-      `${envConfig.NEXT_PUBLIC_API_ENDPOINT}/auth/register`,
-      {
-        body: JSON.stringify(values),
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "POST",
+    try {
+      const result = await authApiRequest.register(values);
+      console.log("result register", result);
+      toast({
+        description: result.payload.message,
+      });
+
+      await authApiRequest.auth({ sessionToken: result.payload.data.token });
+      // ClientSessionToken.value = result.payload.data.token;
+      router.push("/me");
+    } catch (error: any) {
+      console.log("error", error);
+      const errors = error?.payload?.errors as {
+        field: string;
+        message: string;
+      }[];
+
+      const status = error?.status as number;
+      if (status === 422) {
+        errors.forEach((error) => {
+          form.setError(error.field as "email" | "password", {
+            type: "server",
+            message: error.message,
+          });
+        });
+      } else {
+        toast({
+          title: "Lỗi",
+          description:
+            error?.payload?.message || "Đã có lỗi xảy ra, vui lòng thử lại sau",
+          variant: "destructive",
+        });
       }
-    ).then((res) => res.json());
-    console.log("result", result);
+    }
   }
 
   return (

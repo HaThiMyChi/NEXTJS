@@ -18,15 +18,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { LoginBody, LoginBodyType } from "@/src/schemaValidations/auth.schema";
-import envConfig from "@/config";
+
 import { useToast } from "@/hooks/use-toast";
-import { useAppContext } from "@/src/app/app-provider";
+
 import authApiRequest from "@/src/apiRequests/auth";
 import { useRouter } from "next/navigation";
+// import { ClientSessionToken } from "@/lib/http";
 
 export default function LoginForm() {
   const { toast } = useToast();
-  const { setSessionToken } = useAppContext();
+  const router = useRouter();
 
   // 1. Define your form.
   const form = useForm<LoginBodyType>({
@@ -41,7 +42,6 @@ export default function LoginForm() {
   async function onSubmit(values: LoginBodyType) {
     try {
       const result = await authApiRequest.login(values);
-      const router = useRouter();
 
       await authApiRequest.auth({ sessionToken: result.payload.data.token });
       toast({
@@ -49,7 +49,8 @@ export default function LoginForm() {
       });
       console.log("result login form", result);
 
-      setSessionToken(result.payload.data.token);
+      // setSessionToken(result.payload.data.token);
+      // ClientSessionToken.value = result.payload.data.token;
       router.push("/me");
     } catch (error: any) {
       console.log("error", error);
