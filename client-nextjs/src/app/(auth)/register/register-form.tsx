@@ -1,7 +1,7 @@
 "use client";
 
 import { ModeToggle } from "@/components/mode-toggle";
-import React from "react";
+import React, { useState } from "react";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,10 +26,13 @@ import authApiRequest from "@/src/apiRequests/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { sessionToken } from "@/lib/http";
+import { handleErrorApi } from "@/lib/utils";
 
 export default function RegisterForm() {
   const { toast } = useToast();
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
   // 1. Define your form.
   const form = useForm<RegisterBodyType>({
     resolver: zodResolver(RegisterBody),
@@ -43,8 +46,9 @@ export default function RegisterForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: RegisterBodyType) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+    // có nghĩa là loading = true thì nó ko chạy đoạn dưới
+    if (loading) return;
+    setLoading(true);
     try {
       const result = await authApiRequest.register(values);
       console.log("result register", result);
@@ -56,28 +60,12 @@ export default function RegisterForm() {
       // ClientSessionToken.value = result.payload.data.token;
       router.push("/me");
     } catch (error: any) {
-      console.log("error", error);
-      const errors = error?.payload?.errors as {
-        field: string;
-        message: string;
-      }[];
-
-      const status = error?.status as number;
-      if (status === 422) {
-        errors.forEach((error) => {
-          form.setError(error.field as "email" | "password", {
-            type: "server",
-            message: error.message,
-          });
-        });
-      } else {
-        toast({
-          title: "Lỗi",
-          description:
-            error?.payload?.message || "Đã có lỗi xảy ra, vui lòng thử lại sau",
-          variant: "destructive",
-        });
-      }
+      handleErrorApi({
+        error,
+        setError: form.setError,
+      });
+    } finally {
+      setLoading(false);
     }
   }
 

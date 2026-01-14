@@ -1,7 +1,7 @@
 "use client";
 
 import { ModeToggle } from "@/components/mode-toggle";
-import React from "react";
+import React, { useState } from "react";
 
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,10 +24,14 @@ import { useToast } from "@/hooks/use-toast";
 import authApiRequest from "@/src/apiRequests/auth";
 import { useRouter } from "next/navigation";
 // import { ClientSessionToken } from "@/lib/http";
+import { handleErrorApi } from "@/lib/utils";
 
 export default function LoginForm() {
   const { toast } = useToast();
   const router = useRouter();
+
+  // Thêm isLoading state để track trạng thái đang gọi API để tránh api bị gọi liên tục
+  const [loading, setLoading] = useState(false);
 
   // 1. Define your form.
   const form = useForm<LoginBodyType>({
@@ -40,6 +44,9 @@ export default function LoginForm() {
 
   // 2. Define a submit handler.
   async function onSubmit(values: LoginBodyType) {
+    // có nghĩa là loading = true thì nó ko chạy đoạn dưới
+    if (loading) return;
+    setLoading(true);
     try {
       const result = await authApiRequest.login(values);
 
@@ -54,27 +61,13 @@ export default function LoginForm() {
       router.push("/me");
     } catch (error: any) {
       console.log("error", error);
-      const errors = error?.payload?.errors as {
-        field: string;
-        message: string;
-      }[];
 
-      const status = error?.status as number;
-      if (status === 422) {
-        errors.forEach((error) => {
-          form.setError(error.field as "email" | "password", {
-            type: "server",
-            message: error.message,
-          });
-        });
-      } else {
-        toast({
-          title: "Lỗi",
-          description:
-            error?.payload?.message || "Đã có lỗi xảy ra, vui lòng thử lại sau",
-          variant: "destructive",
-        });
-      }
+      handleErrorApi({
+        error,
+        setError: form.setError,
+      });
+    } finally {
+      setLoading(false);
     }
   }
 
