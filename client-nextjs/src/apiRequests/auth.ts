@@ -25,10 +25,20 @@ const authApiRequest = {
         },
       }
     ),
-  logoutFromNextClientToNextServer: () =>
-    http.post("/api/auth/logout", null, {
-      baseUrl: "",
-    }),
+  logoutFromNextClientToNextServer: (
+    force?: boolean | undefined,
+    signal?: AbortSignal
+  ) =>
+    http.post(
+      "/api/auth/logout",
+      {
+        force,
+      },
+      {
+        baseUrl: "",
+        signal,
+      }
+    ),
 };
 
 export default authApiRequest;

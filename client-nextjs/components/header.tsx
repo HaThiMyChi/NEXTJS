@@ -13,6 +13,7 @@ export default function Header() {
         <li>
           <Link href="/register">Đăng ký</Link>
         </li>
+        {/* Do tạo button logout này ở client component nên không thể đặt trong này giống như đăng nhập, đăng ký (nếu để Link giống thì mình phải chuyển hết component này thành use client */}
         <li>
           <ButtonLogout />
         </li>

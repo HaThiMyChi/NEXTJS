@@ -1,3 +1,12 @@
+import { decodeJWT } from "@/lib/utils";
+
+type PayloadJWT = {
+  iat: number;
+  exp: number;
+  tokenType: string;
+  userId: number;
+};
+
 export async function POST(request: Request) {
   const res = await request.json();
   // coi console log cho ben login form no log ra api/auth
@@ -8,10 +17,13 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
+
+  const payload = decodeJWT<PayloadJWT>(sessionToken);
+  const expireDate = new Date(payload.exp * 1000).toUTCString();
   return Response.json(res, {
     status: 200,
     headers: {
-      "Set-Cookie": `sessionToken=${sessionToken}; Path=/; HttpOnly; SameSite=Lax;`,
+      "Set-Cookie": `sessionToken=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Expires=${expireDate}; SameSite=Lax; Secure``,
     },
   });
 }

@@ -1,12 +1,14 @@
 import envConfig from "@/config";
 import { normalizePath } from "@/lib/utils";
 import { LoginResType } from "@/src/schemaValidations/auth.schema";
+import { redirect } from "next/navigation";
 
 type CustomOptions = Omit<RequestInit, "method"> & {
   baseUrl?: string | undefined;
 };
 
 const ENTITY_ERROR_STATUS = 422;
+const AUTHENTICATION_ERROR_STATUS = 401;
 
 type EntityErrorPlayload = {
   message: string;
@@ -68,6 +70,7 @@ class SessionToken {
 // object này chỉ thực hiện ở client thôi
 export const ClientSessionToken = new SessionToken();
 
+let clientLogoutRequest: null | Promise<any> = null;
 const request = async <Response>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   url: string,
@@ -110,6 +113,7 @@ const request = async <Response>(
     payload,
   };
 
+  // Interceptor là nơi chúng ta xử lý request và response trước khi trả về cho phía component
   if (!res.ok) {
     if (res.status === ENTITY_ERROR_STATUS) {
       throw new EntityError(
@@ -118,6 +122,29 @@ const request = async <Response>(
           payload: EntityErrorPlayload;
         }
       );
+    } else if (res.status === AUTHENTICATION_ERROR_STATUS) {
+      if (typeof window !== "undefined") {
+        if (!clientLogoutRequest) {
+          clientLogoutRequest = fetch("api/auth/logout", {
+            method: "POST",
+            body: JSON.stringify({ force: true }),
+            headers: {
+              ...baseHeaders,
+            },
+          });
+          await clientLogoutRequest;
+          ClientSessionToken.value = "";
+          clientLogoutRequest = null;
+          console.log("Đã đăng xuất");
+          // location.href nó chuyển trang full reload nên ko thấy api logout
+          location.href = "/login";
+        }
+      } else {
+        const sessionToken = (options?.headers as any)?.Authorization.split(
+          "Bearer "
+        )[1];
+        redirect(`/logout?sessionToken=${sessionToken}`);
+      }
     } else {
       throw new HttpError(data);
     }
