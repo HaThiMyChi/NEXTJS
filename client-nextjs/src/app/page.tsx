@@ -1,5 +1,4 @@
 import ButtonRedirect from "@/src/app/components/ButtonRedirect";
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
@@ -21,7 +20,7 @@ export default function Home() {
           <Link href={"/register"}>Register</Link>
         </li>
       </ul>
-      <ButtonRedirect />
+      {/* <ButtonRedirect /> */}
     </main>
   );
 }

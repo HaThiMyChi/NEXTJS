@@ -8,22 +8,23 @@ type PayloadJWT = {
 };
 
 export async function POST(request: Request) {
-  const res = await request.json();
+  const body = await request.json();
   // coi console log cho ben login form no log ra api/auth
-  const sessionToken = res.sessionToken as string;
+  const sessionToken = body.sessionToken as string;
+  const expiresAt = body.expiresAt as string;
   if (!sessionToken) {
     return Response.json(
       { message: "Không nhận được session token" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
-  const payload = decodeJWT<PayloadJWT>(sessionToken);
-  const expireDate = new Date(payload.exp * 1000).toUTCString();
-  return Response.json(res, {
+  // const payload = decodeJWT<PayloadJWT>(sessionToken);
+  const expireDate = new Date(expiresAt).toUTCString();
+  return Response.json(body, {
     status: 200,
     headers: {
-      "Set-Cookie": `sessionToken=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Expires=${expireDate}; SameSite=Lax; Secure``,
+      "Set-Cookie": `sessionToken=${sessionToken}; Path=/; HttpOnly; SameSite=Lax; Expires=${expireDate}; SameSite=Lax; Secure`,
     },
   });
 }

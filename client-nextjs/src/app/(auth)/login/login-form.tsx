@@ -50,12 +50,15 @@ export default function LoginForm() {
     try {
       const result = await authApiRequest.login(values);
 
-      await authApiRequest.auth({ sessionToken: result.payload.data.token });
+      await authApiRequest.auth({
+        sessionToken: result.payload.data.token,
+        expiresAt: result.payload.data.expiresAt,
+      });
+
+      console.log("result login form", result);
       toast({
         description: result.payload.message,
       });
-      console.log("result login form", result);
-
       // setSessionToken(result.payload.data.token);
       // ClientSessionToken.value = result.payload.data.token;
       router.push("/me");

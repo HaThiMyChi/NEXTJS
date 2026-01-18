@@ -54,6 +54,7 @@ export class EntityError extends HttpError {
 
 class SessionToken {
   private token = "";
+  private _expiresAt = new Date().toISOString();
   get value() {
     return this.token;
   }
@@ -65,6 +66,17 @@ class SessionToken {
     }
     this.token = token;
   }
+
+  get expiresAt() {
+    return this._expiresAt;
+  }
+
+  set expiresAt(expiresAt: string) {
+    if (typeof window === "undefined") {
+      throw new Error("Cannot set session token on server side");
+    }
+    this._expiresAt = expiresAt;
+  }
 }
 
 // object này chỉ thực hiện ở client thôi
@@ -74,7 +86,7 @@ let clientLogoutRequest: null | Promise<any> = null;
 const request = async <Response>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   url: string,
-  options?: CustomOptions | undefined
+  options?: CustomOptions | undefined,
 ) => {
   const body = options?.body ? JSON.stringify(options.body) : undefined;
   const baseHeaders = {
@@ -120,7 +132,7 @@ const request = async <Response>(
         data as {
           status: 422;
           payload: EntityErrorPlayload;
-        }
+        },
       );
     } else if (res.status === AUTHENTICATION_ERROR_STATUS) {
       if (typeof window !== "undefined") {
@@ -134,6 +146,7 @@ const request = async <Response>(
           });
           await clientLogoutRequest;
           ClientSessionToken.value = "";
+          ClientSessionToken.expiresAt = new Date().toISOString();
           clientLogoutRequest = null;
           console.log("Đã đăng xuất");
           // location.href nó chuyển trang full reload nên ko thấy api logout
@@ -141,7 +154,7 @@ const request = async <Response>(
         }
       } else {
         const sessionToken = (options?.headers as any)?.Authorization.split(
-          "Bearer "
+          "Bearer ",
         )[1];
         redirect(`/logout?sessionToken=${sessionToken}`);
       }
@@ -154,12 +167,14 @@ const request = async <Response>(
   if (typeof window !== "undefined") {
     if (
       ["auth/login", "auth/register"].some(
-        (item) => item === normalizePath(url)
+        (item) => item === normalizePath(url),
       )
     ) {
       ClientSessionToken.value = (payload as LoginResType).data.token;
+      ClientSessionToken.expiresAt = (payload as LoginResType).data.expiresAt;
     } else if ("auth/logout" === normalizePath(url)) {
       ClientSessionToken.value = "";
+      ClientSessionToken.expiresAt = new Date().toISOString();
     }
   }
   return data;
@@ -168,7 +183,7 @@ const request = async <Response>(
 const http = {
   get<Response>(
     url: string,
-    options?: Omit<CustomOptions, "body"> | undefined
+    options?: Omit<CustomOptions, "body"> | undefined,
   ) {
     return request<Response>("GET", url, options);
   },
@@ -176,7 +191,7 @@ const http = {
   post<Response>(
     url: string,
     body: any,
-    options?: Omit<CustomOptions, "body"> | undefined
+    options?: Omit<CustomOptions, "body"> | undefined,
   ) {
     return request<Response>("POST", url, { ...options, body });
   },
@@ -184,14 +199,14 @@ const http = {
   put<Response>(
     url: string,
     body: any,
-    options?: Omit<CustomOptions, "body"> | undefined
+    options?: Omit<CustomOptions, "body"> | undefined,
   ) {
     return request<Response>("PUT", url, { ...options, body });
   },
   delete<Response>(
     url: string,
     body: any,
-    options?: Omit<CustomOptions, "body"> | undefined
+    options?: Omit<CustomOptions, "body"> | undefined,
   ) {
     return request<Response>("DELETE", url, { ...options, body });
   },
