@@ -1,7 +1,7 @@
 import React from "react";
 import { cookies } from "next/headers";
-import Profile from "@/src/app/me/profile";
 import accountApiRequest from "@/src/apiRequests/account";
+import ProfileForm from "@/src/app/me/profile-form";
 
 export default async function MeProfile() {
   const cookieStore = await cookies();
@@ -9,12 +9,12 @@ export default async function MeProfile() {
   console.log("sessionToken", sessionToken);
 
   // sessionToken nó là 1 object vì vậy ?.value để lấy giá trị chuỗi bên trong
+  // Vì dùng cookie nên api này không được cached trên server
   const result = await accountApiRequest.me(sessionToken?.value ?? "");
   return (
     <div>
       <h1>Profile</h1>
-      <div>Xin chào {result.payload?.data?.name}</div>
-      <Profile />
+      <ProfileForm profile={result.payload.data} />
     </div>
   );
 }

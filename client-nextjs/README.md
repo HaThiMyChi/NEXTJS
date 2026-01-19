@@ -35,3 +35,11 @@ Ví dụ session token hết hạn sau 15 ngày thì mỗi khi thời gian hết
 Trong trường hợp người ta không mở website 15 ngày thì khi mở lên sẽ bị đăng xuất
 
 Cách làm này gần giống với phương pháp refresh token, chỉ khác là khi refresh token chúng ta nhận lại cặp access token và refresh token mới. Còn khi dùng session này thì token vẫn giữ nguyên, chỉ là thời gian hết hạn của nó được tăng lên.
+
+## Quản lý Access Token và Refresh Token trong Next.js
+
+1. Next Client gọi API login đến server backend và nhận về refresh token và access token
+2. Gọi `/api/auth đến Nextjs server với body là 2 token trên, mục đích để Nextjs server set 2 token trên vào cookie
+3. Cùng với đó lưu 2 token trên vào 1 object token trong Nextjs client
+4. Nhớ mỗi lần F5 lại web thì phải có logic xử lý lưu 2 token vào object client
+5. Dựa vào access token, ta có thể biết được thời gian hết hạn của nó và canh me khi nào gần hết hạn thì cho gọi Api refresh token. Chúng ta sẽ gọi api đó từ next client đến server backend và cũng gọi lại /api/auth giống như login
