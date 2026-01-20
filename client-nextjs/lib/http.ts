@@ -88,9 +88,16 @@ const request = async <Response>(
   url: string,
   options?: CustomOptions | undefined,
 ) => {
-  const body = options?.body ? JSON.stringify(options.body) : undefined;
+  const body = options?.body
+    ? options?.body instanceof FormData
+      ? options?.body
+      : JSON.stringify(options.body)
+    : undefined;
+  // Chỉ set Content-Type nếu không phải FormData
   const baseHeaders = {
-    "Content-Type": "application/json",
+    ...(!(options?.body instanceof FormData) && {
+      "Content-Type": "application/json",
+    }),
     Authorization: ClientSessionToken.value
       ? `Bearer ${ClientSessionToken.value}`
       : "",
