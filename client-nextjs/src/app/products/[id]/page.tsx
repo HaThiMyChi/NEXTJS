@@ -1,4 +1,6 @@
 import productApiRequest from "@/src/apiRequests/product";
+import ProductAddForm from "@/src/app/products/_components/product-add-form";
+import Image from "next/image";
 import React from "react";
 
 // https://nextjs.org/docs/14/app/building-your-application/routing/dynamic-routes
@@ -21,7 +23,20 @@ export default async function ProductEdit({
   return (
     <div>
       {!product && <div>Không tìm thấy sản phẩm</div>}
-      {product && <div>{product.name}</div>}
+      {/* {product && (
+        <div>
+          <Image
+            src={product.image}
+            alt={product.name}
+            width={180}
+            height={180}
+            className="w-32 h-32 object-cover"
+          />
+          <h3>{product.name}</h3>
+          <div>{product.price}</div>
+        </div>
+      )} */}
+      <ProductAddForm product={product} />
     </div>
   );
 }

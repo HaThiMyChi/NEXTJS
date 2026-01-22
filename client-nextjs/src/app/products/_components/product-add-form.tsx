@@ -23,11 +23,15 @@ import { handleErrorApi } from "@/lib/utils";
 import {
   CreateProductBody,
   CreateProductBodyType,
+  ProductResType,
+  UpdateProductBodyType,
 } from "@/src/schemaValidations/product.schema";
 import productApiRequest from "@/src/apiRequests/product";
 import { Textarea } from "@/components/ui/textarea";
 
-export default function ProductAddForm() {
+type Product = ProductResType['data']
+
+export default function ProductAddForm({product}: {product?: Product}) {
   const { toast } = useToast();
   const router = useRouter();
 
@@ -39,18 +43,16 @@ export default function ProductAddForm() {
   const form = useForm<CreateProductBodyType>({
     resolver: zodResolver(CreateProductBody),
     defaultValues: {
-      name: "",
-      price: 0,
-      description: "",
-      image: "",
+      name: product?.name ?? "",
+      price: product?.price ?? 0,
+      description: product?.description ?? "",
+      image: product?.image ?? "",
     },
   });
 
-  // 2. Define a submit handler.
-  async function onSubmit(values: CreateProductBodyType) {
-    console.log("values in onSubmit", values);
-    // có nghĩa là loading = true thì nó ko chạy đoạn dưới
-    if (loading) return;
+  const image = form.watch('image')
+
+  const createProduct = async (values: CreateProductBodyType) => {
     setLoading(true);
     try {
       const formData = new FormData();
@@ -76,6 +78,7 @@ export default function ProductAddForm() {
       // setSessionToken(result.payload.data.token);
       // ClientSessionToken.value = result.payload.data.token;
       router.push("/products");
+      router.refresh()
     } catch (error: any) {
       console.log("error", error);
 
@@ -85,6 +88,60 @@ export default function ProductAddForm() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  const updateProduct = async(_values: UpdateProductBodyType) => {
+    if (!product) return
+    setLoading(true);
+    let values = _values
+    try {
+      if (file) {
+        const formData = new FormData();
+        formData.append("file", file as Blob);
+        const uploadImageResult = await productApiRequest.uploadImage(formData);
+        const imageUrl = uploadImageResult.payload.data;
+
+        //  Copy shallow tất cả properties từ object values
+        // image: imageUrl - Lập tức override lại property image với giá trị mới từ server
+
+        // values vẫn không thay đổi, vì:
+        // 1. ...values tạo object mới
+        // 2. image: imageUrl chỉ thay đổi trong object mới
+        // 3. values gốc vẫn giữ nguyên
+        values = {
+          ...values,
+          image: imageUrl,
+        };
+      }
+      
+      const result = await productApiRequest.update(product.id, values)
+      toast({
+        description: result.payload.message,
+      });
+      router.refresh()
+    } catch (error: any) {
+      console.log("error", error);
+
+      handleErrorApi({
+        error,
+        setError: form.setError,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // 2. Define a submit handler.
+  async function onSubmit(values: CreateProductBodyType) {
+    console.log("values in onSubmit", values);
+    // có nghĩa là loading = true thì nó ko chạy đoạn dưới
+    if (loading) return;
+    
+    if (product) {
+      await updateProduct(values)
+    } else {
+      await createProduct(values)
     }
   }
 
@@ -172,11 +229,13 @@ export default function ProductAddForm() {
             </FormItem>
           )}
         />
-        {file && (
+        {(file || image) && (
           // Chuyen 1 file anh sang cu phap object url
+          // them dau ! de cho src no khong bi undefined
+
           <div>
             <Image
-              src={URL.createObjectURL(file)}
+              src={file ? URL.createObjectURL(file) : image}
               width={128}
               height={128}
               alt="preview"
@@ -194,9 +253,11 @@ export default function ProductAddForm() {
         )}
 
         <Button type="submit" className="!mt-8 w-full">
-          Thêm sản phẩm
+          {product ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm'}
         </Button>
       </form>
     </Form>
   );
 }
+
+// đặt _folder nextjs nó hiểu đây ko phải là component chứa route
