@@ -3,6 +3,7 @@ import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import DeleteProduct from "@/src/app/products/_components/delete-product";
 
 export default async function ProductListPage() {
   // lấy ra payload theo kiểu destructing
@@ -34,7 +35,7 @@ export default async function ProductListPage() {
                 <Button variant={"outline"}>Edit</Button>
               </Link>
 
-              <Button variant={"destructive"}>Delete</Button>
+              <DeleteProduct product={product} />
             </div>
           </div>
         ))}
