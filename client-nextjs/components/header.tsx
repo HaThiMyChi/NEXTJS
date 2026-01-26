@@ -11,7 +11,7 @@ export default async function Header({
 }) {
   return (
     <div className="flex space-x-4">
-      <ul>
+      <ul className="flex space-x-4">
         <li>
           <Link href="/products">Sản phẩm</Link>
         </li>

@@ -1,22 +1,29 @@
 import productApiRequest from "@/src/apiRequests/product";
+import ProductAddForm from "@/src/app/products/_components/product-add-form";
 import Image from "next/image";
 import React from "react";
 
-export default async function ProductDetail({
+// https://nextjs.org/docs/14/app/building-your-application/routing/dynamic-routes
+// Doc them doc de hieu cach lay param
+export default async function ProductEdit({
   params,
 }: {
   params: { id: string };
 }) {
-  console.log("prams page product detail", params);
   let product = null;
   try {
+    console.log("id", params);
     const { payload } = await productApiRequest.getDetail(Number(params.id));
     product = payload.data;
-  } catch (error) {}
+    console.log("product edit", product);
+  } catch (error) {
+    console.log("error product edit", error);
+  }
+
   return (
     <div>
       {!product && <div>Không tìm thấy sản phẩm</div>}
-      {product && (
+      {/* {product && (
         <div>
           <Image
             src={product.image}
@@ -25,11 +32,11 @@ export default async function ProductDetail({
             height={180}
             className="w-32 h-32 object-cover"
           />
-
           <h3>{product.name}</h3>
           <div>{product.price}</div>
         </div>
-      )}
+      )} */}
+      <ProductAddForm product={product} />
     </div>
   );
 }
