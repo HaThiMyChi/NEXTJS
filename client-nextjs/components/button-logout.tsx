@@ -3,10 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { handleErrorApi } from "@/lib/utils";
 import authApiRequest from "@/src/apiRequests/auth";
+import { useAppContext } from "@/src/app/app-provider";
 import { useRouter, usePathname } from "next/navigation";
 import React from "react";
 
 export default function ButtonLogout() {
+  const { user } = useAppContext();
+  console.log("user button logout", user);
   const router = useRouter();
   const pathname = usePathname();
   const handleLogout = async () => {
