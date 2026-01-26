@@ -61,7 +61,8 @@ export default function LoginForm() {
       });
       // setSessionToken(result.payload.data.token);
       // ClientSessionToken.value = result.payload.data.token;
-      router.push("/me");
+      router.push("/");
+      router.refresh();
     } catch (error: any) {
       console.log("error", error);
 

@@ -1,25 +1,55 @@
 import ButtonLogout from "@/components/button-logout";
 import { ModeToggle } from "@/components/mode-toggle";
+import accountApiRequest from "@/src/apiRequests/account";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import React from "react";
 
-export default function Header() {
+export default async function Header() {
+  const cookieStore = cookies();
+  console.log("cookie get in header", cookieStore.get("sessionToken"));
+
+  const sessionToken = cookieStore.get("sessionToken")?.value;
+  let user = null;
+  if (sessionToken) {
+    const data = await accountApiRequest.me(sessionToken);
+    user = data.payload.data;
+  }
+  console.log("user", user);
+
   return (
-    <div>
+    <div className="flex space-x-4">
       <ul>
         <li>
           <Link href="/products">Sản phẩm</Link>
         </li>
-        <li>
-          <Link href="/login">Đăng nhập</Link>
-        </li>
-        <li>
-          <Link href="/register">Đăng ký</Link>
-        </li>
+        {user ? (
+          <>
+            <li>
+              <div>
+                Xin chào <strong>{user.name}</strong>
+              </div>
+            </li>
+            {/* Do tạo button logout này ở client component nên không thể đặt trong này giống như đăng nhập, đăng ký (nếu để Link giống thì mình phải chuyển hết component này thành use client */}
+            <li>
+              <ButtonLogout />
+            </li>
+          </>
+        ) : (
+          <>
+            <li>
+              <Link href="/login">Đăng nhập</Link>
+            </li>
+            <li>
+              <Link href="/register">Đăng ký</Link>
+            </li>
+          </>
+        )}
+
         {/* Do tạo button logout này ở client component nên không thể đặt trong này giống như đăng nhập, đăng ký (nếu để Link giống thì mình phải chuyển hết component này thành use client */}
-        <li>
+        {/* <li>
           <ButtonLogout />
-        </li>
+        </li> */}
       </ul>
       <ModeToggle />
     </div>

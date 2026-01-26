@@ -27,7 +27,7 @@ export class HttpError extends Error {
   };
 
   constructor({ status, payload }: { status: number; payload: any }) {
-    super("HTTP Error");
+    super(payload?.message || `HTTP Error (${status})`);
     this.status = status;
     this.payload = payload;
   }
@@ -166,6 +166,7 @@ const request = async <Response>(
         redirect(`/logout?sessionToken=${sessionToken}`);
       }
     } else {
+      console.log("HTTP ERROR:", res.status, payload);
       throw new HttpError(data);
     }
   }
