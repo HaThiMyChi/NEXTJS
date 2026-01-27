@@ -10,6 +10,7 @@ import { cookies } from "next/headers";
 import SlideSession from "@/components/slide-session";
 import accountApiRequest from "@/src/apiRequests/account";
 import { AccountResType } from "@/src/schemaValidations/account.schema";
+import { baseOpenGraph } from "@/src/app/shared-metadata";
 
 const myFont = localFont({
   src: [
@@ -32,6 +33,8 @@ const inter = Inter({ subsets: ["vietnamese"] });
 
 export const metadata: Metadata = {
   title: { template: "%s | Productic", default: "Productic" },
+  description: "Được tạo bởi Chi Hà",
+  openGraph: { ...baseOpenGraph },
 };
 
 export default async function RootLayout({

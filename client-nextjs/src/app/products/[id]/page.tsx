@@ -3,6 +3,8 @@ import Image from "next/image";
 import React from "react";
 import type { Metadata, ResolvingMetadata } from "next";
 import { cache } from "react";
+import envConfig from "@/config";
+import { baseOpenGraph } from "@/src/app/shared-metadata";
 
 const getDetail = cache(productApiRequest.getDetail);
 
@@ -21,10 +23,26 @@ export async function generateMetadata(
   // fetch data
   const { payload } = await getDetail(Number(id));
   const product = payload.data;
-
+  const url = envConfig.NEXT_PUBLIC_URL + "/products/" + product.id;
   return {
     title: product.name,
     description: product.description,
+    openGraph: {
+      title: product.name,
+      description: product.description,
+      url,
+      siteName: "Productic Company",
+      images: [
+        {
+          url: product.image, // Must be an absolute URL
+        },
+      ],
+
+      ...baseOpenGraph,
+    },
+    alternates: {
+      canonical: url,
+    },
   };
 }
 
