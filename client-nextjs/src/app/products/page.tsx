@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import DeleteProduct from "@/src/app/products/_components/delete-product";
 import { cookies } from "next/headers";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Danh sách sản phẩm",
+  description: "Danh sách sản phẩm của productic, được tạo bởi Chi Hà",
+};
 
 export default async function ProductListPage() {
   const cookieStore = cookies();

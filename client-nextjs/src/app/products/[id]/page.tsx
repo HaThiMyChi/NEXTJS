@@ -1,16 +1,38 @@
 import productApiRequest from "@/src/apiRequests/product";
 import Image from "next/image";
 import React from "react";
+import type { Metadata, ResolvingMetadata } from "next";
+import { cache } from "react";
 
-export default async function ProductDetail({
-  params,
-}: {
+const getDetail = cache(productApiRequest.getDetail);
+
+type Props = {
   params: { id: string };
-}) {
+  searchParams: { [key: string]: string | string[] | undefined };
+};
+
+export async function generateMetadata(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  // read route params
+  const { id } = await params;
+
+  // fetch data
+  const { payload } = await getDetail(Number(id));
+  const product = payload.data;
+
+  return {
+    title: product.name,
+    description: product.description,
+  };
+}
+
+export default async function ProductDetail({ params, searchParams }: Props) {
   console.log("prams page product detail", params);
   let product = null;
   try {
-    const { payload } = await productApiRequest.getDetail(Number(params.id));
+    const { payload } = await getDetail(Number(params.id));
     product = payload.data;
   } catch (error) {}
   return (
