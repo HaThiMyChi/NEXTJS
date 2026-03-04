@@ -1,11 +1,10 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import { ClientSessionToken } from "@/lib/http";
+import { Suspense, useEffect } from "react";
 import authApiRequest from "@/src/apiRequests/auth";
 
-export default function Logout() {
+function LogoutLogic() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -14,7 +13,7 @@ export default function Logout() {
     const controller = new AbortController();
     const signal = controller.signal;
 
-    if (sessionToken === ClientSessionToken.value) {
+    if (sessionToken === localStorage.getItem("sessionToken")) {
       authApiRequest
         .logoutFromNextClientToNextServer(true, signal)
         .then((res) => {
@@ -25,4 +24,12 @@ export default function Logout() {
     return () => controller.abort(); // cleanup: hủy request
   }, [sessionToken, router, pathname]);
   return <div>page</div>;
+}
+
+export default function LogoutPage() {
+  return (
+    <Suspense>
+      <LogoutLogic />
+    </Suspense>
+  );
 }

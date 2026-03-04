@@ -1,6 +1,6 @@
 "use client";
 
-import { ClientSessionToken } from "@/lib/http";
+// import { ClientSessionToken } from "@/lib/http";
 import authApiRequest from "@/src/apiRequests/auth";
 import React, { useEffect } from "react";
 import { differenceInHours } from "date-fns";
@@ -14,11 +14,22 @@ export default function SlideSession() {
         // Ví dụ: nó có thời gian hết hạn là ngày 27/4/2024 10:00:00
         // Mà hiện tại là 27/4/2024 17:00:00
         const now = new Date();
-        const expiresAt = new Date(ClientSessionToken.expiresAt);
+        // nếu mà để ! ở cuối thì chỗ này nó luôn luôn có data
+        const sessionTokenExpiresAt = localStorage.getItem(
+          "sessionTokenExpiresAt",
+        );
+        const expiresAt = sessionTokenExpiresAt
+          ? new Date(sessionTokenExpiresAt)
+          : new Date();
+        // const expiresAt = new Date(ClientSessionToken.expiresAt);
         if (differenceInHours(expiresAt, now) < 1) {
           const res =
             await authApiRequest.slideSessionFromNextClientToNextServer();
-          ClientSessionToken.expiresAt = res.payload.data.expiresAt;
+          // ClientSessionToken.expiresAt = res.payload.data.expiresAt;
+          localStorage.setItem(
+            "sessionTokenExpiresAt",
+            res.payload.data.expiresAt,
+          );
         }
       },
       1000 * 60 * 60,

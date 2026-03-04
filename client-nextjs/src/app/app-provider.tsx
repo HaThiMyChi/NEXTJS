@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, createContext, useContext } from "react";
-import { ClientSessionToken } from "@/lib/http";
+// import { ClientSessionToken } from "@/lib/http";
 import { AccountResType } from "@/src/schemaValidations/account.schema";
 
 type User = AccountResType["data"];
@@ -19,7 +19,6 @@ export const useAppContext = () => {
 };
 export default function AppProvider({
   children,
-  initialSessionToken = "",
   user: userProp,
 }: {
   children: React.ReactNode;
@@ -29,11 +28,7 @@ export default function AppProvider({
   const [user, setUser] = useState<User | null>(userProp);
   // Nếu console log ClientSessionToken.value ở đây sẽ là '' bởi vì trong Profile nó chạy trước thằng useLayoutEffect vì vậy nếu có console log thì xem trong profile
   // cũng có thể dùng useState bởi vì nó sẽ chạy 1 lần trước khi những component trong {children} được render
-  useState(() => {
-    if (typeof window !== "undefined") {
-      ClientSessionToken.value = initialSessionToken;
-    }
-  });
+
   // useLayoutEffect(() => {
   //   ClientSessionToken.value = initialSessionToken;
   // }, [initialSessionToken]);
