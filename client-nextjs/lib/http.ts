@@ -15,7 +15,7 @@ type EntityErrorPlayload = {
   errors: {
     field: string;
     message: string;
-  };
+  }[];
 };
 
 export class HttpError extends Error {

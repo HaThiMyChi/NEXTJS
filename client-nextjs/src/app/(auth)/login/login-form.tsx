@@ -25,6 +25,7 @@ import authApiRequest from "@/src/apiRequests/auth";
 import { useRouter } from "next/navigation";
 // import { ClientSessionToken } from "@/lib/http";
 import { handleErrorApi } from "@/lib/utils";
+import { useAppContext } from "@/src/app/app-provider";
 
 export default function LoginForm() {
   const { toast } = useToast();
@@ -32,6 +33,7 @@ export default function LoginForm() {
 
   // Thêm isLoading state để track trạng thái đang gọi API để tránh api bị gọi liên tục
   const [loading, setLoading] = useState(false);
+  const { setUser } = useAppContext();
 
   // 1. Define your form.
   const form = useForm<LoginBodyType>({
@@ -61,6 +63,8 @@ export default function LoginForm() {
       });
       // setSessionToken(result.payload.data.token);
       // ClientSessionToken.value = result.payload.data.token;
+
+      setUser(result.payload.data.account);
       router.push("/");
       router.refresh();
     } catch (error: any) {

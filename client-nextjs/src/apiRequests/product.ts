@@ -8,10 +8,7 @@ import {
 } from "@/src/schemaValidations/product.schema";
 
 export const productApiRequest = {
-  getList: () =>
-    http.get<ProductListResType>("/products", {
-      cache: "no-store",
-    }),
+  getList: () => http.get<ProductListResType>("/products"),
   // Tắt cache ở nơi fetch list/detail (force-dynamic / no-store) để refresh lại data mới đã update
   getDetail: (id: number) =>
     http.get<ProductResType>(`/products/${id}`, {

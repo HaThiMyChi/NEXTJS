@@ -3,10 +3,13 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect } from "react";
 import authApiRequest from "@/src/apiRequests/auth";
+import { useAppContext } from "@/src/app/app-provider";
 
 function LogoutLogic() {
   const router = useRouter();
   const pathname = usePathname();
+  const { setUser } = useAppContext();
+
   const searchParams = useSearchParams();
   const sessionToken = searchParams.get("sessionToken");
   useEffect(() => {
@@ -17,12 +20,13 @@ function LogoutLogic() {
       authApiRequest
         .logoutFromNextClientToNextServer(true, signal)
         .then((res) => {
+          setUser(null);
           router.push(`/login?redirectFrom=${pathname}`);
         });
     }
     console.log("logout sessionToken", sessionToken);
     return () => controller.abort(); // cleanup: hủy request
-  }, [sessionToken, router, pathname]);
+  }, [sessionToken, router, pathname, setUser]);
   return <div>page</div>;
 }
 
