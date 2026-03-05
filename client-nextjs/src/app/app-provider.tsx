@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, createContext, useContext } from "react";
+import React, { useState, createContext, useContext, useCallback } from "react";
 // import { ClientSessionToken } from "@/lib/http";
 import { AccountResType } from "@/src/schemaValidations/account.schema";
 import { isClient } from "@/lib/http";
@@ -34,10 +34,13 @@ export default function AppProvider({
     return null;
   });
   const isAuthenticated = Boolean(user);
-  const setUser = (user: User | null) => {
-    setUserState(user);
-    localStorage.setItem("user", JSON.stringify(user));
-  };
+  const setUser = useCallback(
+    (user: User | null) => {
+      setUserState(user);
+      localStorage.setItem("user", JSON.stringify(user));
+    },
+    [setUserState],
+  );
 
   // Nếu console log ClientSessionToken.value ở đây sẽ là '' bởi vì trong Profile nó chạy trước thằng useLayoutEffect vì vậy nếu có console log thì xem trong profile
   // cũng có thể dùng useState bởi vì nó sẽ chạy 1 lần trước khi những component trong {children} được render

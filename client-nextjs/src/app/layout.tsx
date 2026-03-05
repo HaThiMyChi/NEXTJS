@@ -3,15 +3,13 @@ import "./globals.css";
 import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Inter } from "next/font/google";
-import Header from "@/components/header";
 import { Toaster } from "@/components/ui/toaster";
 import AppProvider from "@/src/app/app-provider";
-import { cookies } from "next/headers";
 import SlideSession from "@/components/slide-session";
-import accountApiRequest from "@/src/apiRequests/account";
-import { AccountResType } from "@/src/schemaValidations/account.schema";
 import { baseOpenGraph } from "@/src/app/shared-metadata";
+import dynamic from "next/dynamic";
 
+const Header = dynamic(() => import("@/components/header"), { ssr: false });
 const myFont = localFont({
   src: [
     {
@@ -42,8 +40,6 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  let user: AccountResType["data"] | null = null;
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head />

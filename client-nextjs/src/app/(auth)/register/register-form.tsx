@@ -25,13 +25,14 @@ import envConfig from "@/config";
 import authApiRequest from "@/src/apiRequests/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { sessionToken } from "@/lib/http";
 import { handleErrorApi } from "@/lib/utils";
+import { useAppContext } from "@/src/app/app-provider";
 
 export default function RegisterForm() {
   const { toast } = useToast();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { setUser } = useAppContext();
 
   // 1. Define your form.
   const form = useForm<RegisterBodyType>({
@@ -62,6 +63,7 @@ export default function RegisterForm() {
         description: result.payload.message,
       });
 
+      setUser(result.payload.data.account);
       // ClientSessionToken.value = result.payload.data.token;
       router.push("/me");
     } catch (error: any) {
